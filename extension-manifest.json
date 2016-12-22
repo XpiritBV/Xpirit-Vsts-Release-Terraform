@@ -1,0 +1,79 @@
+{
+  "manifestVersion": 1,
+  "id": "PeterGroenewegen-Xpirit-Vsts-Release-Terraform",
+  "name": "Terraform",
+  "version": "1.0.1",
+  "publisher": "petergroenewegen",
+  "public": true,
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "description": "Build extension that enable you to run Terraforms on the build agent.",
+  "categories": [
+    "Build and release"
+  ],
+  "tags": [
+    "terraform",
+    "release",
+    "build",
+    "azure",
+    "azurerm",
+    "aws",
+    "iac",
+    "google",
+    "cloud",
+    "infrastucture as code",
+    "Hashicorp",
+    "Xpirit",
+    "deploy",
+    "template"
+  ],
+  "screenshots": [
+    {
+      "path": "Xpirit.Vsts.Release.Terraform.Extension/images/screenshot.png"
+    }
+  ],
+  "content": {
+    "details": {
+      "path": "Xpirit.Vsts.Release.Terraform.Extension/readme.md"
+    },
+    "license": {
+      "path": "Xpirit.Vsts.Release.Terraform.Extension/license.txt"
+    }
+  },
+  "links": {
+    "getstarted": {
+      "uri": "https://pgroene.wordpress.com/"
+    },
+    "support": {
+      "uri": "https://github.com/XpiritBV/Vsts-Release-Task-Terraform"
+    }
+  },
+  "branding": {
+    "color": "rgb(36, 43, 50)",
+    "theme": "dark"
+  },
+  "icons": {
+    "default": "Xpirit.Vsts.Release.Terraform.Extension/images/Terraform.png"
+  },
+  "files": [
+    {
+      "path": "Xpirit-Vsts-Release-Terraform"
+    }
+  ],
+
+  "contributions": [
+    {
+      "id": "Xpirit-Vsts-Release-Terraform",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "Xpirit-Vsts-Release-Terraform"
+      }
+    }
+  ]
+}

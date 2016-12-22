@@ -1,0 +1,125 @@
+{
+  "id": "31f040e5-e040-4336-878a-59a493289794",
+  "name": "Terraform",
+  "friendlyName": "Run Terraform",
+  "description": "Run a Terraform on the build agent",
+  "helpMarkDown": "[More Information](https://pgroene.wordpress.com/2016/06/14/getting-started-with-terraform-on-windows-and-azure/)",
+  "category": "Deploy",
+  "visibility": [ "Build", "Release" ],
+  "author": "Peter Groenewegen - Xpirit",
+  "version": {
+    "Major": 1,
+    "Minor": 0,
+    "Patch": 0
+  },
+  "demands": [ "azureps" ],
+  "minimumAgentVersion": "1.95.0",
+  "inputs": [
+     {
+      "name": "TemplatePath",
+      "type": "filePath",
+      "label": "Terraform template path",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Source path where templates are stored"
+    },
+    {
+      "name": "RunPath",
+      "type": "filePath",
+      "label": "Run path",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Filepath where to run terraforms"
+    },
+    {
+      "name": "Arguments",
+      "type": "string",
+      "label": "Terraform arguments",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Arguments passed to terraform: plan, apply, validate etc"
+    },
+    {
+      "name": "InstallTerraform",
+      "type": "boolean",
+      "label": "Install terraform",
+      "defaultValue": "false",
+      "required": true,
+      "helpMarkDown": "Select if you want terraform deployed on your build agent"
+    },    
+    {
+      "name": "Version",
+      "type": "string",
+      "label": "Terraform version",
+      "defaultValue": "latest",
+      "required": false,
+      "helpMarkDown": "Version to install on the build agent, use latest for latest version",
+      "visibleRule": "InstallTerraform == true"
+    },
+    {
+      "name": "ManageState",
+      "type": "boolean",
+      "label": "Manage state in blobstorage",
+      "defaultValue": "false",
+      "required": true,
+      "helpMarkDown": "Select if you want the extention to manage the state in blobstorage"
+    },
+    {
+      "name": "ConnectedServiceNameSelector",
+      "type": "pickList",
+      "label": "Azure Connection Type",
+      "required": true,
+      "helpMarkDown": "",
+      "defaultValue": "ConnectedServiceNameARM",
+      "options": {
+        "ConnectedServiceNameARM": "Azure Resource Manager"
+      },
+      "visibleRule": "ManageState == true"
+    },
+    {
+      "name": "ConnectedServiceNameARM",
+      "type": "connectedService:AzureRM",
+      "label": "AzureRM Subscription",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Select the Azure Resource Manager subscription.",
+      "visibleRule": "ManageState == true"
+    },
+    {
+      "name": "StorageAccountRM",
+      "type": "pickList",
+      "label": "RM Storage Account",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Specify a pre-existing ARM storage account.",
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "visibleRule": "ManageState == true"
+    },
+     {
+      "name": "StorageContainerName",
+      "type": "string",
+      "label": "Blob Container Name",
+      "defaultValue": "",
+      "required": true,
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "helpMarkDown": "Enter the name the Blob container within the given StorageAccount."
+    }
+  ],
+  "dataSourceBindings": [
+  {
+    "target": "StorageAccountRM",
+    "endpointId": "$(ConnectedServiceNameARM)",
+    "dataSourceName": "AzureStorageAccountRM"
+  }
+  ],
+  "instanceNameFormat": "Terraform $(Arguments)",
+  "execution": {
+    "PowerShell3": {
+      "target": "$(currentDirectory)\\Terraform.ps1"
+    }
+  }
+}

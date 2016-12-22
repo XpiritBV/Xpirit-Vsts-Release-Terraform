@@ -1,0 +1,90 @@
+{
+  "_args": [
+    [
+      "vsts-task-sdk",
+      "C:\\workspaces\\Xpirit.Vsts.Build.InlinePowershell"
+    ]
+  ],
+  "_from": "vsts-task-sdk@latest",
+  "_id": "vsts-task-sdk@0.6.2",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/vsts-task-sdk",
+  "_nodeVersion": "5.10.1",
+  "_npmOperationalInternal": {
+    "host": "packages-12-west.internal.npmjs.com",
+    "tmp": "tmp/vsts-task-sdk-0.6.2.tgz_1461093180826_0.6422432246617973"
+  },
+  "_npmUser": {
+    "email": "bigbldt@microsoft.com",
+    "name": "vsonline"
+  },
+  "_npmVersion": "3.8.3",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "vsts-task-sdk",
+    "raw": "vsts-task-sdk",
+    "rawSpec": "",
+    "scope": null,
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/vsts-task-sdk/-/vsts-task-sdk-0.6.2.tgz",
+  "_shasum": "282e79f0dd6e72630ba8136c2351d648a8011662",
+  "_shrinkwrap": null,
+  "_spec": "vsts-task-sdk",
+  "_where": "C:\\workspaces\\Xpirit.Vsts.Build.InlinePowershell",
+  "author": {
+    "name": "Microsoft"
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/vsts-task-lib/issues"
+  },
+  "dependencies": {
+    "q": "^1.2.0"
+  },
+  "description": "VSTS Task SDK",
+  "devDependencies": {
+    "del": "^2.2.0",
+    "gulp": "^3.9.0",
+    "gulp-mocha": "^2.1.3",
+    "gulp-tsc": "^1.1.0",
+    "mocha": "^2.3.3",
+    "run-sequence": "^1.0.2",
+    "semver": "^5.1.0",
+    "shelljs": "^0.5.3"
+  },
+  "directories": {},
+  "dist": {
+    "shasum": "282e79f0dd6e72630ba8136c2351d648a8011662",
+    "tarball": "https://registry.npmjs.org/vsts-task-sdk/-/vsts-task-sdk-0.6.2.tgz"
+  },
+  "homepage": "https://github.com/Microsoft/vsts-task-lib#readme",
+  "keywords": [
+    "agent",
+    "build",
+    "vsts",
+    "xplat"
+  ],
+  "license": "MIT",
+  "maintainers": [
+    {
+      "name": "vsonline",
+      "email": "bigbldt@microsoft.com"
+    }
+  ],
+  "name": "vsts-task-sdk",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Microsoft/vsts-task-lib.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.6.2"
+}
