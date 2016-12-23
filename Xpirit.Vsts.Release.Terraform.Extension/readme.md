@@ -8,7 +8,7 @@ The terraform task let you:
 - install terraform if not installed on build server
 - run terraform commands and arguments
 
-![screenshot](images/screenshot.png)
+![screenshot](https://raw.githubusercontent.com/XpiritBV/Xpirit-Vsts-Release-Terraform/master/Xpirit.Vsts.Release.Terraform.Extension/images/screenshot.png)
 
 # Extra links
 
