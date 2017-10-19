@@ -106,7 +106,8 @@
       "properties": {
         "EditableOptions": "True"
       },
-      "helpMarkDown": "Enter the name the Blob container within the given StorageAccount."
+      "helpMarkDown": "Enter the name the Blob container within the given StorageAccount.",
+      "visibleRule": "ManageState == true"
     }
   ],
   "dataSourceBindings": [
