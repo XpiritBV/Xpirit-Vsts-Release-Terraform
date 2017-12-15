@@ -1,24 +1,24 @@
 Trace-VstsEnteringInvocation $MyInvocation
 
-
-
 function Install-Terraform
 {
     $version = Get-VstsInput -Name Version
+
+    # Need to force using more up-to-date encryption protocols; Hashicorp is on-point deprecating broken ones.
+    [System.Net.ServicePointManager]::SecurityProtocol = `
+                [System.Net.SecurityProtocolType]::Tls11 -bor 
+                [System.Net.SecurityProtocolType]::Tls12 -bor `
+                [System.Net.SecurityProtocolType]::Tls -bor `
+                [System.Net.SecurityProtocolType]::Ssl3
 
     $terraformbaseurl = "https://releases.hashicorp.com/terraform/"
     $path = "c:\terraform-download"
 
     $regex = """/terraform/([0-9]+\.[0-9]+\.[0-9]+)/"""
 
-    $web = New-Object Net.WebClient
-    $webpage = $web.DownloadString($terraformbaseurl)
-
+    $webpage = (Invoke-WebRequest $terraformbaseurl -UseBasicParsing).Content
 
     $versions = $webpage -split "`n" | Select-String -pattern $regex -AllMatches | % { $_.Matches | % { $_.Groups[1].Value } }
-
-    $latest = $versions[0]
-
     if ($version -eq "latest")
     {
         $version = $versions[0]
@@ -27,14 +27,14 @@ function Install-Terraform
     {
         if (-not $versions.Contains($version))
         {   
-            throw [System.Exception] "$version not found."    
+            throw [System.Exception] "$version not found."
         }
     }
 
     $tempfile = [System.IO.Path]::GetTempFileName()
     $source = "https://releases.hashicorp.com/terraform/"+$version+"/terraform_"+$version+"_windows_amd64.zip"
 
-    Invoke-WebRequest $source -OutFile $tempfile
+    Invoke-WebRequest $source -UseBasicParsing -OutFile $tempfile
 
     if (-not (test-path $path))
     {
@@ -66,10 +66,10 @@ function Install-Terraform
 
 function Invoke-Terraform
 {
-    $argumentents = Get-VstsInput -Name Arguments -Require
+    $arguments = (Get-VstsInput -Name Arguments -Require) -split '\s+'
     
-    Write-Host "Running: terraform $argumentents"
-    terraform $argumentents
+    Write-Host "Running: terraform $arguments"
+    & terraform $arguments
 
     if ($LASTEXITCODE)
     {
@@ -115,38 +115,25 @@ function Set-TerraformState
     Set-AzureStorageBlobContent -Force -Context $SourceContext -Container $StorageContainerName  -File "terraform.tfstate.backup" -Blob "terraform.tfstate.backup"
 }
 
-function Prepare
-{
-    $runpath = Get-VstsInput -Name RunPath -Require
-    $templatesPath = Get-VstsInput -Name TemplatePath -Require
-
-    Write-Host "Source path $templatesPath, destination path $runpath"
-    if (-not (test-path $runpath)){
-         mkdir $runpath
-    }
-    
-    $path = "$templatesPath\*"
-    Copy-Item $path $runpath  -recurse 
-
-    cd $runpath
+$templatesPath = Get-VstsInput -Name TemplatePath -Require
+if (-not (Test-Path $templatesPath)) {
+    Write-Host "##vso[task.logissue type=error;] Template Path location ($templatesPath) does not exist, failing out" 
+    Write-Host "##vso[task.complete result=Failed]"
+    exit(1)
 }
+Set-Location $templatesPath
 
-Prepare
-
-$installTerraform = Get-VstsInput -Name InstallTerraform -Require
-$manageTerraformState = Get-VstsInput -Name ManageState -Require 
+$installTerraform = Get-VstsInput -Name InstallTerraform -Require -AsBool
+$manageTerraformState = Get-VstsInput -Name ManageState -Require -AsBool
 
 if ($manageTerraformState){
     # Initialize Azure.
     Import-Module $PSScriptRoot\ps_modules\VstsAzureHelpers_
     Initialize-Azure
-
-   
     Get-TerraformState($StorageAccountName, $StorageContainerName)
 }
 
 if ($installTerraform){
-   
     Install-Terraform
 }
 
