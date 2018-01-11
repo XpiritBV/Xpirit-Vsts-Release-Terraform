@@ -97,7 +97,7 @@ function Get-TerraformState
     if ($tfstate){
         Get-AzureStorageBlobContent -Context  $SourceContext -Container $StorageContainerName -Blob  "terraform.tfstate" -Destination  "terraform.tfstate" -Force -ErrorAction Stop
     }
-
+    
     $tfstatebackup = Get-AzureStorageBlob -Context  $SourceContext -Container $StorageContainerName | where { $_.Name -eq "terraform.tfstate.backup"}
     if ($tfstatebackup){
         Get-AzureStorageBlobContent -Context  $SourceContext -Container $StorageContainerName -Blob  "terraform.tfstate.backup" -Destination  "terraform.tfstate.backup" -Force -ErrorAction Stop
@@ -111,8 +111,19 @@ function Set-TerraformState
 
     Write-Host "Set-TerraformState: Using StorageAccountName $StorageAccountName and StorageContainerName $StorageContainerName"
     $SourceContext = (Get-AzureRmStorageAccount |  where { $_.StorageAccountName -eq $StorageAccountName}).Context
-    Set-AzureStorageBlobContent -Force -Context $SourceContext -Container $StorageContainerName  -File "terraform.tfstate" -Blob "terraform.tfstate"
-    Set-AzureStorageBlobContent -Force -Context $SourceContext -Container $StorageContainerName  -File "terraform.tfstate.backup" -Blob "terraform.tfstate.backup"
+    if ((Test-Path "terraform.tfstate")){
+        Set-AzureStorageBlobContent -Force -Context $SourceContext -Container $StorageContainerName  -File "terraform.tfstate" -Blob "terraform.tfstate"
+    }
+    else {
+        Write-Host "##vso[task.logissue type=warning;] Terraform state not found and not uploaded" 
+    }
+
+    if ((Test-Path "terraform.tfstate.backup")){
+        Set-AzureStorageBlobContent -Force -Context $SourceContext -Container $StorageContainerName  -File "terraform.tfstate.backup" -Blob "terraform.tfstate.backup"
+    }
+    else {
+        Write-Host "##vso[task.logissue type=warning;] Terraform state backup not found and not uploaded" 
+    }
 }
 
 $templatesPath = Get-VstsInput -Name TemplatePath -Require
