@@ -1,5 +1,24 @@
 Trace-VstsEnteringInvocation $MyInvocation
 
+#region ImportFunctions
+$functionFolders = @('Public')
+ForEach ($folder in $functionFolders)
+{
+    $folderPath = Join-Path -Path $PSScriptRoot -ChildPath $folder
+    If (Test-Path -Path $folderPath)
+    {
+        Write-Verbose -Message "Importing from $folder"
+        $functions = Get-ChildItem -Path $folderPath -Filter '*.ps1'
+        ForEach ($function in $functions)
+        {
+            Write-Verbose -Message "  Importing $($function.BaseName)"
+            . $($function.FullName)
+        }
+    }
+}
+#endregion
+
+#region FunctionDefinitions
 function Install-Terraform
 {
     $version = Get-VstsInput -Name Version
@@ -125,6 +144,9 @@ function Set-TerraformState
         Write-Host "##vso[task.logissue type=warning;] Terraform state backup not found and not uploaded" 
     }
 }
+#endregion
+
+#region Script
 
 $templatesPath = Get-VstsInput -Name TemplatePath -Require
 if (-not (Test-Path $templatesPath)) {
@@ -141,6 +163,8 @@ if ($manageTerraformState){
     # Initialize Azure.
     Import-Module $PSScriptRoot\ps_modules\VstsAzureHelpers_
     Initialize-Azure
+    $resourceGroupName = Get-VstsInput -Name StorageAccountResourceGroup -Require 
+    Ensure-AzStorageContainerExists -ResourceGroupName $resourceGroupName -StorageAccountName $StorageAccountName -StorageContainer $StorageContainerName
     Get-TerraformState($StorageAccountName, $StorageContainerName)
 }
 
@@ -155,3 +179,5 @@ if ($manageTerraformState){
 }
 
 Write-Host "End of Task Terraform" 
+
+#endregion

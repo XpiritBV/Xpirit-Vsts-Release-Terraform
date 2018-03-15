@@ -86,6 +86,18 @@
       "visibleRule": "ManageState == true"
     },
     {
+      "name": "StorageAccountResourceGroup",
+      "type": "pickList",
+      "label": "Resource Group of Storage Account",
+      "defaultValue": "",
+      "required": true,
+      "helpMarkDown": "Specify a pre-existing ARM resource group.",
+      "properties": {
+        "EditableOptions": "True"
+      },
+      "visibleRule": "ManageState == true"
+    },
+    {
       "name": "StorageAccountRM",
       "type": "pickList",
       "label": "RM Storage Account",
