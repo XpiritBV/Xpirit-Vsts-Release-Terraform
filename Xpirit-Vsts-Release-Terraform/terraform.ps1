@@ -163,8 +163,10 @@ if ($manageTerraformState){
     # Initialize Azure.
     Import-Module $PSScriptRoot\ps_modules\VstsAzureHelpers_
     Initialize-Azure
-    $resourceGroupName = Get-VstsInput -Name StorageAccountResourceGroup -Require 
-    Ensure-AzStorageContainerExists -ResourceGroupName $resourceGroupName -StorageAccountName $StorageAccountName -StorageContainer $StorageContainerName
+    $ResourceGroupName = Get-VstsInput -Name StorageAccountResourceGroup -Require
+    $StorageAccountName = Get-VstsInput -Name StorageAccountRM -Require
+    $StorageContainerName = Get-VstsInput -Name StorageContainerName -Require  
+    Ensure-AzStorageContainerExists -ResourceGroupName $ResourceGroupName -StorageAccountName $StorageAccountName -StorageContainer $StorageContainerName
     Get-TerraformState($StorageAccountName, $StorageContainerName)
 }
 
