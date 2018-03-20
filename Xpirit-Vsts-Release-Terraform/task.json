@@ -127,6 +127,11 @@
     "target": "StorageAccountRM",
     "endpointId": "$(ConnectedServiceNameARM)",
     "dataSourceName": "AzureStorageAccountRM"
+  },
+  {
+    "target": "StorageAccountResourceGroup",
+    "endpointId": "$(ConnectedServiceNameARM)",
+    "dataSourceName": "AzureResourceGroups"
   }
   ],
   "instanceNameFormat": "Terraform $(Arguments)",
