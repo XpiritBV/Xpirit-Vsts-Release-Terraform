@@ -146,7 +146,7 @@ function Invoke-Terraform
 {
     $arguments = (Get-VstsInput -Name Arguments -Require) -split '\s+'
     
-    Invoke-VstsTool -FileName terraform -arguments "$arguments"
+    Invoke-VstsTool -FileName terraform -arguments "$arguments -input=false -no-color"
 
     if ($LASTEXITCODE)
     {
