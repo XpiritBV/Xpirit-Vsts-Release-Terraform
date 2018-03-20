@@ -55,14 +55,14 @@
       "required": false,
       "helpMarkDown": "Version to install on the build agent, use latest for latest version",
       "visibleRule": "InstallTerraform == true"
-    },
+    },    
     {
       "name": "ManageState",
       "type": "boolean",
-      "label": "Manage state in blobstorage",
+      "label": "Init state in blobstorage",
       "defaultValue": "false",
       "required": true,
-      "helpMarkDown": "Select if you want the extention to manage the state in blobstorage"
+      "helpMarkDown": "Select if you want the extention to init the state in blobstorage"
     },
     {
       "name": "ConnectedServiceNameSelector",
@@ -109,7 +109,7 @@
       },
       "visibleRule": "ManageState == true"
     },
-     {
+    {
       "name": "StorageContainerName",
       "type": "string",
       "label": "Blob Container Name",
@@ -119,6 +119,15 @@
         "EditableOptions": "True"
       },
       "helpMarkDown": "Enter the name the Blob container within the given StorageAccount.",
+      "visibleRule": "ManageState == true"
+    },
+    {
+      "name": "InitArguments",
+      "type": "string",
+      "label": "Additional Terraform Init arguments",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Arguments passed to terraform init",
       "visibleRule": "ManageState == true"
     }
   ],
