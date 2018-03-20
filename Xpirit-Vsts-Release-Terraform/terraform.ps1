@@ -83,11 +83,30 @@ function Install-Terraform
     terraform --version
 }
 
+function Get-BackendConfig
+{
+    $tfFiles = Get-ChildItem -Include "*.tf" -File -Recurse
+    Foreach ($file in $tfFiles)
+    {
+        $fileContents = [System.IO.File]::ReadAllText($file)
+        if ($fileContents -Match "backend `"azurerm`"")
+        {
+            $startIndex = $fileContents.IndexOf("backend `"azurerm`"")
+            $startIndex = $fileContents.IndexOf('{', $startIndex) + 1            
+            $endIndex = $fileContents.IndexOf('}', $startIndex)            
+            $keyValues = $fileContents.Substring($startIndex, $endIndex - $startIndex)
+            $backendConfig = ConvertFrom-StringData -StringData $keyValues     
+            foreach ($key in $($backendConfig.Keys))
+            {
+                $backendConfig.Item($key) = $backendConfig.Item($key).Trim("`"", " ")                
+            }            
+            return $backendConfig
+        }        
+    }    
+}
+
 function Initialize-Terraform
 {       
-    $StorageAccountName = Get-VstsInput -Name StorageAccountRM -Require
-    $ResourceGroupName = Get-VstsInput -Name StorageAccountResourceGroup -Require
-    $StorageContainerName = Get-VstsInput -Name StorageContainerName -Require  
     $ConnectedServiceName = Get-VstsInput -Name ConnectedServiceNameARM -Require
     $Endpoint = Get-VstsEndpoint -Name $ConnectedServiceName -Require
 
@@ -95,13 +114,20 @@ function Initialize-Terraform
         throw (New-Object System.Exception((Get-VstsLocString -Key AZ_ServicePrincipalRequired), $_.Exception))
     }
 
-    Write-Host "Init-Terraform: StorageAccountName $StorageAccountName and ResourceGroupName $ResourceGroupName and StorageContainerName $StorageContainerName"
+    $RemoteStateArguments = "-backend-config=`"arm_subscription_id=$($Endpoint.Data.subscriptionId)`" -backend-config=`"arm_tenant_id=$($Endpoint.Auth.Parameters.TenantId)`" -backend-config=`"arm_client_id=$($Endpoint.Auth.Parameters.ServicePrincipalId)`" -backend-config=`"arm_client_secret=$($Endpoint.Auth.Parameters.ServicePrincipalKey)`""
+
+    $SpecifyStorageAccount = Get-VstsInput -name SpecifyStorageAccount -Require -AsBool
+    if ($SpecifyStorageAccount){
+        $ResourceGroupName = Get-VstsInput -Name StorageAccountResourceGroup -Require
+        $StorageAccountName = Get-VstsInput -Name StorageAccountRM -Require
+        $StorageContainerName = Get-VstsInput -Name StorageContainerName -Require  
+        $RemoteStateArguments = "$RemoteStateArguments -backend-config=`"resource_group_name=$ResourceGroupName`" -backend-config=`"storage_account_name=$StorageAccountName`" -backend-config=`"container_name=$StorageContainerName`""
+    }
     
-    $RemoteStateArguments = "-backend-config=`"storage_account_name=$StorageAccountName`" -backend-config=`"resource_group_name=$ResourceGroupName`" -backend-config=`"container_name=$StorageContainerName`" -backend-config=`"arm_subscription_id=$($Endpoint.Data.subscriptionId)`" -backend-config=`"arm_tenant_id=$($Endpoint.Auth.Parameters.TenantId)`" -backend-config=`"arm_client_id=$($Endpoint.Auth.Parameters.ServicePrincipalId)`" -backend-config=`"arm_client_secret=$($Endpoint.Auth.Parameters.ServicePrincipalKey)`""
     $AdditionalArguments = Get-VstsInput -Name InitArguments
     if (-not ([string]::IsNullOrEmpty($AdditionalArguments)))
     {
-        $Arguments = $RemoteStateArguments + " $AdditionalArguments -input=false -no-color"
+        $Arguments = $RemoteStateArguments + " $($AdditionalArguments.Trim()) -input=false -no-color"
     } else {
         $Arguments = $RemoteStateArguments + " -input=false -no-color"
     }
@@ -143,14 +169,22 @@ Set-Location $templatesPath
 
 $installTerraform = Get-VstsInput -Name InstallTerraform -Require -AsBool
 $manageTerraformState = Get-VstsInput -Name ManageState -Require -AsBool
+$specifyStorageAccount = Get-VstsInput -name SpecifyStorageAccount -Require -AsBool
 
 if ($manageTerraformState){
     # Initialize Azure.
     Import-Module $PSScriptRoot\ps_modules\VstsAzureHelpers_
     Initialize-Azure
-    $ResourceGroupName = Get-VstsInput -Name StorageAccountResourceGroup -Require
-    $StorageAccountName = Get-VstsInput -Name StorageAccountRM -Require
-    $StorageContainerName = Get-VstsInput -Name StorageContainerName -Require  
+    if ($specifyStorageAccount){
+        $ResourceGroupName = Get-VstsInput -Name StorageAccountResourceGroup -Require
+        $StorageAccountName = Get-VstsInput -Name StorageAccountRM -Require
+        $StorageContainerName = Get-VstsInput -Name StorageContainerName -Require 
+    } else {
+        $backendConfig = Get-BackendConfig
+        $ResourceGroupName = $backendConfig.resource_group_name
+        $StorageAccountName = $backendConfig.storage_account_name
+        $StorageContainerName = $backendConfig.container_name
+    }     
     Ensure-AzStorageContainerExists -ResourceGroupName $ResourceGroupName -StorageAccountName $StorageAccountName -StorageContainer $StorageContainerName    
 }
 
