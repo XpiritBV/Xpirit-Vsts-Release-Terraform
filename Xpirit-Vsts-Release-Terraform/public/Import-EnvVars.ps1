@@ -12,5 +12,5 @@ function Import-EnvVars  {
     $env:ARM_SUBSCRIPTION_ID = $endpoint.Data.subscriptionId
     $env:ARM_TENANT_ID = $endpoint.Auth.Parameters.TenantId
     $env:ARM_CLIENT_ID = $endpoint.Auth.Parameters.ServicePrincipalId
-    $env:ARM_CLIENT_SECRET = $endpoint.Auth.Parameters.ServicePrincipalKey
+    $env:ARM_CLIENT_SECRET = "$($endpoint.Auth.Parameters.ServicePrincipalKey)"
 }
