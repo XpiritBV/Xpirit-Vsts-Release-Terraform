@@ -55,14 +55,14 @@
       "required": false,
       "helpMarkDown": "Version to install on the build agent, use latest for latest version",
       "visibleRule": "InstallTerraform == true"
-    },    
+    },
     {
-      "name": "ManageState",
+      "name": "UseAzureSub",
       "type": "boolean",
-      "label": "Init state in Azure storage",
+      "label": "Use Azure service principal endpoint",
       "defaultValue": "false",
       "required": true,
-      "helpMarkDown": "Select if you want the extention to init the state in blobstorage"
+      "helpMarkDown": "Select if you want to use an Azure endpoint configured with a Service Principal"
     },
     {
       "name": "ConnectedServiceNameSelector",
@@ -74,7 +74,7 @@
       "options": {
         "ConnectedServiceNameARM": "Azure Resource Manager"
       },
-      "visibleRule": "ManageState == true"
+      "visibleRule": "UseAzureSub == true"
     },
     {
       "name": "ConnectedServiceNameARM",
@@ -83,7 +83,15 @@
       "defaultValue": "",
       "required": true,
       "helpMarkDown": "Select the Azure Resource Manager subscription.",
-      "visibleRule": "ManageState == true"
+      "visibleRule": "UseAzureSub == true"
+    }, 
+    {
+      "name": "ManageState",
+      "type": "boolean",
+      "label": "Init state in Azure storage",
+      "defaultValue": "false",
+      "required": true,
+      "helpMarkDown": "Select if you want the extention to init the state in blobstorage"
     },
     {
       "name": "SpecifyStorageAccount",

@@ -168,8 +168,13 @@ if (-not (Test-Path $templatesPath)) {
 Set-Location $templatesPath
 
 $installTerraform = Get-VstsInput -Name InstallTerraform -Require -AsBool
+$useAzureSub = Get-VstsInput -Name UseAzureSub -Require -AsBool
 $manageTerraformState = Get-VstsInput -Name ManageState -Require -AsBool
 $specifyStorageAccount = Get-VstsInput -name SpecifyStorageAccount -Require -AsBool
+
+if ($useAzureSub){
+    Import-EnvVars
+}
 
 if ($manageTerraformState){
     # Initialize Azure.
