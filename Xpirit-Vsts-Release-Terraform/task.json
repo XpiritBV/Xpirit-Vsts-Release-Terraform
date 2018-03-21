@@ -91,7 +91,8 @@
       "label": "Init state in Azure storage",
       "defaultValue": "false",
       "required": true,
-      "helpMarkDown": "Select if you want the extention to init the state in blobstorage"
+      "helpMarkDown": "Select if you want the extention to init the state in blobstorage",
+      "visibleRule": "UseAzureSub == true"
     },
     {
       "name": "SpecifyStorageAccount",

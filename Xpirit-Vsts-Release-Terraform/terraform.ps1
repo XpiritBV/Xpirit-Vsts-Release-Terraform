@@ -176,7 +176,7 @@ if ($useAzureSub){
     Import-EnvVars
 }
 
-if ($manageTerraformState){
+if ($useAzureSub -and $manageTerraformState){
     # Initialize Azure.
     Import-Module $PSScriptRoot\ps_modules\VstsAzureHelpers_
     Initialize-Azure
@@ -197,7 +197,7 @@ if ($installTerraform){
     Install-Terraform
 }
 
-if ($manageTerraformState){
+if ($useAzureSub -and $manageTerraformState){
     Initialize-Terraform
 }
 
