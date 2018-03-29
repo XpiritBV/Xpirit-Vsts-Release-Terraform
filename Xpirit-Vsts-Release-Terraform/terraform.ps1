@@ -83,65 +83,76 @@ function Install-Terraform
     terraform --version
 }
 
+function Get-BackendConfig
+{
+    $tfFiles = Get-ChildItem -Include "*.tf" -File -Recurse
+    Foreach ($file in $tfFiles)
+    {
+        $fileContents = [System.IO.File]::ReadAllText($file)
+        if ($fileContents -Match "backend `"azurerm`"")
+        {
+            $startIndex = $fileContents.IndexOf("backend `"azurerm`"")
+            $startIndex = $fileContents.IndexOf('{', $startIndex) + 1            
+            $endIndex = $fileContents.IndexOf('}', $startIndex)            
+            $keyValues = $fileContents.Substring($startIndex, $endIndex - $startIndex)
+            $backendConfig = ConvertFrom-StringData -StringData $keyValues     
+            foreach ($key in $($backendConfig.Keys))
+            {
+                $backendConfig.Item($key) = $backendConfig.Item($key).Trim("`"", " ")                
+            }            
+            return $backendConfig
+        }        
+    }    
+}
+
+function Initialize-Terraform
+{       
+    $connectedServiceName = Get-VstsInput -Name ConnectedServiceNameARM -Require
+    $endpoint = Get-VstsEndpoint -Name $connectedServiceName -Require
+
+    if ($endpoint.Auth.Scheme -ne 'ServicePrincipal') {        
+        throw (New-Object System.Exception((Get-VstsLocString -Key AZ_ServicePrincipalRequired), $_.Exception))
+    }
+
+    $remoteStateArguments = "-backend-config=`"arm_subscription_id=$($endpoint.Data.subscriptionId)`" -backend-config=`"arm_tenant_id=$($endpoint.Auth.Parameters.TenantId)`" -backend-config=`"arm_client_id=$($endpoint.Auth.Parameters.ServicePrincipalId)`" -backend-config=`"arm_client_secret=$($endpoint.Auth.Parameters.ServicePrincipalKey)`""
+
+    $specifyStorageAccount = Get-VstsInput -name SpecifyStorageAccount -Require -AsBool
+    if ($specifyStorageAccount){
+        $resourceGroupName = Get-VstsInput -Name StorageAccountResourceGroup -Require
+        $storageAccountName = Get-VstsInput -Name StorageAccountRM -Require
+        $storageContainerName = Get-VstsInput -Name StorageContainerName -Require  
+        $remoteStateArguments = "$remoteStateArguments -backend-config=`"resource_group_name=$resourceGroupName`" -backend-config=`"storage_account_name=$storageAccountName`" -backend-config=`"container_name=$storageContainerName`""
+    }
+    
+    $additionalArguments = Get-VstsInput -Name InitArguments
+    if (-not ([string]::IsNullOrEmpty($additionalArguments)))
+    {
+        $arguments = $remoteStateArguments + " $($additionalArguments.Trim()) -input=false -no-color"
+    } else {
+        $arguments = $remoteStateArguments + " -input=false -no-color"
+    }
+       
+    Invoke-VstsTool -FileName terraform -arguments "init $arguments"
+
+    if ($LASTEXITCODE)
+    {
+        $E = $Error[0]
+        Write-Host "##vso[task.logissue type=error;] Terraform init failed to execute. Error: $E" 
+        Write-Host "##vso[task.complete result=Failed]"
+    }
+}
+
 function Invoke-Terraform
 {
     $arguments = (Get-VstsInput -Name Arguments -Require) -split '\s+'
     
-    Write-Host "Running: terraform $arguments"
-    & terraform $arguments
+    Invoke-VstsTool -FileName terraform -arguments "$($arguments.Trim()) -input=false -no-color"
 
     if ($LASTEXITCODE)
     {
         $E = $Error[0]
         Write-Host "##vso[task.logissue type=error;] Terraform failed to execute. Error: $E" 
         Write-Host "##vso[task.complete result=Failed]"
-    }
-}
-
-function Get-TerraformState
-{
-    $StorageAccountName = Get-VstsInput -Name StorageAccountRM -Require
-    $StorageContainerName = Get-VstsInput -Name StorageContainerName -Require  
-
-    Write-Host "Get-TerraformState: Using StorageAccountName $StorageAccountName and StorageContainerName $StorageContainerName "
-    $SourceContext = (Get-AzureRmStorageAccount |  where { $_.StorageAccountName -eq $StorageAccountName}).Context
-
-    if ((Test-Path "terraform.tfstate") -or (Test-Path "terraform.tfstate.backup")){
-        Write-Host "##vso[task.logissue type=error;] Terraform state files in run directory, can not override to prevent data lose" 
-        Write-Host "##vso[task.complete result=Failed]"
-        exit(1)
-    }
-
-    $tfstate = Get-AzureStorageBlob -Context  $SourceContext -Container $StorageContainerName | where { $_.Name -eq "terraform.tfstate"}
-    if ($tfstate){
-        Get-AzureStorageBlobContent -Context  $SourceContext -Container $StorageContainerName -Blob  "terraform.tfstate" -Destination  "terraform.tfstate" -Force -ErrorAction Stop
-    }
-    
-    $tfstatebackup = Get-AzureStorageBlob -Context  $SourceContext -Container $StorageContainerName | where { $_.Name -eq "terraform.tfstate.backup"}
-    if ($tfstatebackup){
-        Get-AzureStorageBlobContent -Context  $SourceContext -Container $StorageContainerName -Blob  "terraform.tfstate.backup" -Destination  "terraform.tfstate.backup" -Force -ErrorAction Stop
-    }
-}
-
-function Set-TerraformState
-{
-    $StorageAccountName = Get-VstsInput -Name StorageAccountRM -Require
-    $StorageContainerName = Get-VstsInput -Name StorageContainerName -Require  
-
-    Write-Host "Set-TerraformState: Using StorageAccountName $StorageAccountName and StorageContainerName $StorageContainerName"
-    $SourceContext = (Get-AzureRmStorageAccount |  where { $_.StorageAccountName -eq $StorageAccountName}).Context
-    if ((Test-Path "terraform.tfstate")){
-        Set-AzureStorageBlobContent -Force -Context $SourceContext -Container $StorageContainerName  -File "terraform.tfstate" -Blob "terraform.tfstate"
-    }
-    else {
-        Write-Host "##vso[task.logissue type=warning;] Terraform state not found and not uploaded" 
-    }
-
-    if ((Test-Path "terraform.tfstate.backup")){
-        Set-AzureStorageBlobContent -Force -Context $SourceContext -Container $StorageContainerName  -File "terraform.tfstate.backup" -Blob "terraform.tfstate.backup"
-    }
-    else {
-        Write-Host "##vso[task.logissue type=warning;] Terraform state backup not found and not uploaded" 
     }
 }
 #endregion
@@ -157,28 +168,40 @@ if (-not (Test-Path $templatesPath)) {
 Set-Location $templatesPath
 
 $installTerraform = Get-VstsInput -Name InstallTerraform -Require -AsBool
+$useAzureSub = Get-VstsInput -Name UseAzureSub -Require -AsBool
 $manageTerraformState = Get-VstsInput -Name ManageState -Require -AsBool
+$specifyStorageAccount = Get-VstsInput -name SpecifyStorageAccount -Require -AsBool
 
-if ($manageTerraformState){
+if ($useAzureSub){
+    Import-EnvVars
+}
+
+if ($useAzureSub -and $manageTerraformState){
     # Initialize Azure.
     Import-Module $PSScriptRoot\ps_modules\VstsAzureHelpers_
     Initialize-Azure
-    $ResourceGroupName = Get-VstsInput -Name StorageAccountResourceGroup -Require
-    $StorageAccountName = Get-VstsInput -Name StorageAccountRM -Require
-    $StorageContainerName = Get-VstsInput -Name StorageContainerName -Require  
-    Ensure-AzStorageContainerExists -ResourceGroupName $ResourceGroupName -StorageAccountName $StorageAccountName -StorageContainer $StorageContainerName
-    Get-TerraformState($StorageAccountName, $StorageContainerName)
+    if ($specifyStorageAccount){
+        $resourceGroupName = Get-VstsInput -Name StorageAccountResourceGroup -Require
+        $storageAccountName = Get-VstsInput -Name StorageAccountRM -Require
+        $storageContainerName = Get-VstsInput -Name StorageContainerName -Require 
+    } else {
+        $backendConfig = Get-BackendConfig
+        $resourceGroupName = $backendConfig.resource_group_name
+        $storageAccountName = $backendConfig.storage_account_name
+        $storageContainerName = $backendConfig.container_name
+    }     
+    Ensure-AzStorageContainerExists -ResourceGroupName $resourceGroupName -StorageAccountName $storageAccountName -StorageContainer $storageContainerName    
 }
 
 if ($installTerraform){
     Install-Terraform
 }
 
-Invoke-Terraform
-
-if ($manageTerraformState){
-    Set-TerraformState
+if ($useAzureSub -and $manageTerraformState){
+    Initialize-Terraform
 }
+
+Invoke-Terraform
 
 Write-Host "End of Task Terraform" 
 

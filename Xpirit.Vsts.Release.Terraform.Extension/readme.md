@@ -3,8 +3,8 @@
 Run terraform on the build server
 
 The terraform task let you:
-
-- manage save terraform state file in azure blob storage
+- Use a service endpoint to provide azure credentials
+- Use Azure blob storage for terraform remote backend
 - install terraform if not installed on build server
 - run terraform commands and arguments
 
