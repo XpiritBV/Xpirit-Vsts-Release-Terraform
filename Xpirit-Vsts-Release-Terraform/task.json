@@ -9,8 +9,8 @@
   "author": "Peter Groenewegen - Xpirit",
   "version": {
     "Major": 1,
-    "Minor": 2,
-    "Patch": 1
+    "Minor": 3,
+    "Patch": 0
   },
   "demands": [ "azureps" ],
   "minimumAgentVersion": "1.95.0",
@@ -57,12 +57,12 @@
       "visibleRule": "InstallTerraform == true"
     },
     {
-      "name": "ManageState",
+      "name": "UseAzureSub",
       "type": "boolean",
-      "label": "Manage state in blobstorage",
+      "label": "Use Azure service principal endpoint",
       "defaultValue": "false",
       "required": true,
-      "helpMarkDown": "Select if you want the extention to manage the state in blobstorage"
+      "helpMarkDown": "Select if you want to use an Azure endpoint configured with a Service Principal"
     },
     {
       "name": "ConnectedServiceNameSelector",
@@ -74,51 +74,78 @@
       "options": {
         "ConnectedServiceNameARM": "Azure Resource Manager"
       },
-      "visibleRule": "ManageState == true"
+      "visibleRule": "UseAzureSub == true"
     },
     {
       "name": "ConnectedServiceNameARM",
       "type": "connectedService:AzureRM",
-      "label": "AzureRM Subscription",
+      "label": "Azure Subscription",
       "defaultValue": "",
       "required": true,
       "helpMarkDown": "Select the Azure Resource Manager subscription.",
+      "visibleRule": "UseAzureSub == true"
+    }, 
+    {
+      "name": "ManageState",
+      "type": "boolean",
+      "label": "Init state in Azure storage",
+      "defaultValue": "false",
+      "required": true,
+      "helpMarkDown": "Select if you want the extention to init the state in blobstorage",
+      "visibleRule": "UseAzureSub == true"
+    },
+    {
+      "name": "SpecifyStorageAccount",
+      "type": "boolean",
+      "label": "Specify Storage Account",
+      "defaultValue": "false",
+      "required": true,
+      "helpMarkDown": "Select if you want to specify the storage account.",
       "visibleRule": "ManageState == true"
     },
     {
       "name": "StorageAccountResourceGroup",
       "type": "pickList",
-      "label": "Resource Group of Storage Account",
+      "label": "Resource Group",
       "defaultValue": "",
       "required": true,
       "helpMarkDown": "Specify a pre-existing ARM resource group.",
       "properties": {
         "EditableOptions": "True"
       },
-      "visibleRule": "ManageState == true"
+      "visibleRule": "SpecifyStorageAccount == true"
     },
     {
       "name": "StorageAccountRM",
       "type": "pickList",
-      "label": "RM Storage Account",
+      "label": "Storage Account",
       "defaultValue": "",
       "required": true,
       "helpMarkDown": "Specify a pre-existing ARM storage account.",
       "properties": {
         "EditableOptions": "True"
       },
-      "visibleRule": "ManageState == true"
+      "visibleRule": "SpecifyStorageAccount == true"
     },
-     {
+    {
       "name": "StorageContainerName",
       "type": "string",
-      "label": "Blob Container Name",
+      "label": "Container Name",
       "defaultValue": "",
-      "required": true,
+      "required": true,      
+      "helpMarkDown": "Enter the name the container within the given StorageAccount.",
       "properties": {
         "EditableOptions": "True"
       },
-      "helpMarkDown": "Enter the name the Blob container within the given StorageAccount.",
+      "visibleRule": "SpecifyStorageAccount == true"
+    },
+    {
+      "name": "InitArguments",
+      "type": "string",
+      "label": "Additional Terraform Init arguments",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Arguments passed to terraform init",
       "visibleRule": "ManageState == true"
     }
   ],
@@ -127,6 +154,11 @@
     "target": "StorageAccountRM",
     "endpointId": "$(ConnectedServiceNameARM)",
     "dataSourceName": "AzureStorageAccountRM"
+  },
+  {
+    "target": "StorageAccountResourceGroup",
+    "endpointId": "$(ConnectedServiceNameARM)",
+    "dataSourceName": "AzureResourceGroups"
   }
   ],
   "instanceNameFormat": "Terraform $(Arguments)",
