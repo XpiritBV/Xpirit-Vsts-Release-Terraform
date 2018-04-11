@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "PeterGroenewegen-Xpirit-Vsts-Release-Terraform",
   "name": "Terraform",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "publisher": "petergroenewegen",
   "public": true,
   "targets": [
@@ -48,7 +48,7 @@
       "uri": "https://pgroene.wordpress.com/"
     },
     "support": {
-      "uri": "https://github.com/XpiritBV/Vsts-Release-Task-Terraform"
+      "uri": "https://github.com/XpiritBV/Xpirit-Vsts-Release-Terraform"
     }
   },
   "branding": {
