@@ -146,7 +146,7 @@ function Invoke-Terraform
 {
     $arguments = (Get-VstsInput -Name Arguments -Require) -split '\s+'
 
-    $defaultArgs = " -input=false -no-color " + (Get-VstsInput -Name PlanPath)
+    $defaultArgs = "-input=false -no-color " + (Get-VstsInput -Name PlanPath)
     
     Invoke-VstsTool -FileName terraform -arguments "$($arguments.Trim()) $($defaultArgs.TrimEnd())"
 
