@@ -8,9 +8,9 @@
   "visibility": [ "Build", "Release" ],
   "author": "Peter Groenewegen - Xpirit",
   "version": {
-    "Major": 1,
-    "Minor": 3,
-    "Patch": 0
+    "Major": 2,
+    "Minor": 0,
+    "Patch": 1
   },
   "demands": [ "azureps" ],
   "minimumAgentVersion": "1.95.0",
