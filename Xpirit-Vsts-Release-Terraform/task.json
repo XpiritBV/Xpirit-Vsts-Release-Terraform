@@ -33,7 +33,7 @@
     },
     {
       "name": "PlanPath",
-      "type": "filePath",
+      "type": "string",
       "label": "Plan file path",
       "defaultValue": "",
       "required": false,
