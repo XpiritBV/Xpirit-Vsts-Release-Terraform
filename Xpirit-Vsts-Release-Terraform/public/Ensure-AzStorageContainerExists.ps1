@@ -10,8 +10,9 @@ function Ensure-AzStorageContainerExists {
         $StorageContainer
     )
     
+    Write-Host "Resource group is: " $ResourceGroupName
     Write-Host "Storage account is: " $StorageAccountName
-    Write-Host "Container account is: " $StorageContainer
+    Write-Host "Container name is: " $StorageContainer
 
     $account = Get-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -StorageAccountName $StorageAccountName
     $containerNotFound = $true
@@ -25,6 +26,7 @@ function Ensure-AzStorageContainerExists {
     }
 
     if ($containerNotFound) {
+        Write-Host "Creating storage container..."
         $account | New-AzureStorageContainer -Name $storageContainer
      }
 }
