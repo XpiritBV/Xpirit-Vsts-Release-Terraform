@@ -24,20 +24,20 @@
       "helpMarkDown": "Source path where templates are stored"
     },
     {
-      "name": "RunPath",
-      "type": "filePath",
-      "label": "Run path",
-      "defaultValue": "",
-      "required": true,
-      "helpMarkDown": "Filepath where to run terraforms"
-    },
-    {
       "name": "Arguments",
       "type": "string",
       "label": "Terraform arguments",
       "defaultValue": "",
       "required": true,
       "helpMarkDown": "Arguments passed to terraform: plan, apply, validate etc"
+    },
+    {
+      "name": "PlanPath",
+      "type": "string",
+      "label": "Plan file path",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Path of plan file to use in apply step. Can also be used to specify alternate path to tf files."
     },
     {
       "name": "InstallTerraform",
