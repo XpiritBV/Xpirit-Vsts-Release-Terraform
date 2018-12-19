@@ -125,11 +125,18 @@ function Initialize-Terraform
     }
     
     $additionalArguments = Get-VstsInput -Name InitArguments
+
+    $extraArguments = " -input=false -no-color"
+
+    if ($additionalArguments.Trim() -like "output*") {
+        $extraArguments = "";
+    }
+
     if (-not ([string]::IsNullOrEmpty($additionalArguments)))
     {
-        $arguments = $remoteStateArguments + " $($additionalArguments.Trim()) -input=false -no-color"
+        $arguments = $remoteStateArguments + " $($additionalArguments.Trim()) $($extraArguments.Trim())"
     } else {
-        $arguments = $remoteStateArguments + " -input=false -no-color"
+        $arguments = $remoteStateArguments + " $($extraArguments.Trim())"
     }
        
     Invoke-VstsTool -FileName terraform -arguments "init $arguments"
