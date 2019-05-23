@@ -127,6 +127,10 @@ function Initialize-Terraform
     $additionalArguments = Get-VstsInput -Name InitArguments
 
     $extraArguments = " -input=false -no-color"
+    
+    if ($additionalArguments.Trim() -like "validate*") {
+        $extraArguments = ""
+    }
 
     if ($additionalArguments.Trim() -like "output*") {
         $extraArguments = "";
