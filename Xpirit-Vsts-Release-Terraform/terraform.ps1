@@ -155,6 +155,11 @@ function Invoke-Terraform
 
     $defaultArgs = "-input=false -no-color " + (Get-VstsInput -Name PlanPath)
     
+    if ($arguments.Trim() -like "validate*") 
+    {
+        $defaultArgs = "-no-color " + (Get-VstsInput -Name PlanPath)
+    }
+    
     Invoke-VstsTool -FileName terraform -arguments "$($arguments.Trim()) $($defaultArgs.TrimEnd())"
 
     if ($LASTEXITCODE)
