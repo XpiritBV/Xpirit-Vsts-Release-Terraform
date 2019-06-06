@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "PeterGroenewegen-Xpirit-Vsts-Release-Terraform",
   "name": "Terraform",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "publisher": "petergroenewegen",
   "public": true,
   "targets": [
@@ -63,7 +63,6 @@
       "path": "Xpirit-Vsts-Release-Terraform"
     }
   ],
-
   "contributions": [
     {
       "id": "Xpirit-Vsts-Release-Terraform",

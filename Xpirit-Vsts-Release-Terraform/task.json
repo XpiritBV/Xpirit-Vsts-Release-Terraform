@@ -5,17 +5,22 @@
   "description": "Run a Terraform on the build agent",
   "helpMarkDown": "[More Information](https://pgroene.wordpress.com/2016/06/14/getting-started-with-terraform-on-windows-and-azure/)",
   "category": "Deploy",
-  "visibility": [ "Build", "Release" ],
+  "visibility": [
+    "Build",
+    "Release"
+  ],
   "author": "Peter Groenewegen - Xpirit",
   "version": {
     "Major": 2,
     "Minor": 1,
-    "Patch": 0
+    "Patch": 1
   },
-  "demands": [ "azureps" ],
+  "demands": [
+    "azureps"
+  ],
   "minimumAgentVersion": "1.95.0",
   "inputs": [
-     {
+    {
       "name": "TemplatePath",
       "type": "filePath",
       "label": "Terraform template path",
@@ -46,7 +51,7 @@
       "defaultValue": "false",
       "required": true,
       "helpMarkDown": "Select if you want terraform deployed on your build agent"
-    },    
+    },
     {
       "name": "Version",
       "type": "string",
@@ -84,7 +89,7 @@
       "required": true,
       "helpMarkDown": "Select the Azure Resource Manager subscription.",
       "visibleRule": "UseAzureSub == true"
-    }, 
+    },
     {
       "name": "ManageState",
       "type": "boolean",
@@ -132,7 +137,7 @@
       "type": "string",
       "label": "Container Name",
       "defaultValue": "",
-      "required": true,      
+      "required": true,
       "helpMarkDown": "Enter the name the container within the given StorageAccount.",
       "properties": {
         "EditableOptions": "True"
@@ -150,16 +155,16 @@
     }
   ],
   "dataSourceBindings": [
-  {
-    "target": "StorageAccountRM",
-    "endpointId": "$(ConnectedServiceNameARM)",
-    "dataSourceName": "AzureStorageAccountRM"
-  },
-  {
-    "target": "StorageAccountResourceGroup",
-    "endpointId": "$(ConnectedServiceNameARM)",
-    "dataSourceName": "AzureResourceGroups"
-  }
+    {
+      "target": "StorageAccountRM",
+      "endpointId": "$(ConnectedServiceNameARM)",
+      "dataSourceName": "AzureStorageAccountRM"
+    },
+    {
+      "target": "StorageAccountResourceGroup",
+      "endpointId": "$(ConnectedServiceNameARM)",
+      "dataSourceName": "AzureResourceGroups"
+    }
   ],
   "instanceNameFormat": "Terraform $(Arguments)",
   "execution": {
