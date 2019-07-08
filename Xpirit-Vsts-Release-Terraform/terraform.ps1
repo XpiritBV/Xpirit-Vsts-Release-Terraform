@@ -155,7 +155,7 @@ function Invoke-Terraform
 
     $defaultArgs = "-input=false -no-color " + (Get-VstsInput -Name PlanPath)
     
-    if ($arguments.Trim() -like "validate*") 
+    if ($arguments.Trim() -like "validate*" -or $arguments.Trim() -like "workspace*") 
     {
         $defaultArgs = "-no-color " + (Get-VstsInput -Name PlanPath)
     }
