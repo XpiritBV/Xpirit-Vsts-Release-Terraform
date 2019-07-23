@@ -134,9 +134,9 @@ function Initialize-Terraform
 
     if (-not ([string]::IsNullOrEmpty($additionalArguments)))
     {
-        $arguments = $remoteStateArguments + "$($extraArguments.Trim()) $($additionalArguments.Trim())"
+        $arguments = $remoteStateArguments + "$extraArguments $($additionalArguments.Trim())"
     } else {
-        $arguments = $remoteStateArguments + "$($extraArguments.Trim())"
+        $arguments = $remoteStateArguments + "$extraArguments"
     }
        
     Invoke-VstsTool -FileName terraform -arguments "init $arguments"
