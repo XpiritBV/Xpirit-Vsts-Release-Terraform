@@ -126,20 +126,24 @@ function Initialize-Terraform
     
     $additionalArguments = Get-VstsInput -Name InitArguments
 
-    $extraArguments = " -input=false -no-color"
+    $defaultArgs = "-input=false -no-color" 
 
     if ($additionalArguments.Trim() -like "output*") {
-        $extraArguments = "";
+        $defaultArgs = ""
     }
 
     if (-not ([string]::IsNullOrEmpty($additionalArguments)))
     {
-        $arguments = $remoteStateArguments + " $($additionalArguments.Trim()) $($extraArguments.Trim())"
+        $arguments = $remoteStateArguments + " $($additionalArguments.Trim()) $($defaultArgs.Trim())"
     } else {
-        $arguments = $remoteStateArguments + " $($extraArguments.Trim())"
+        $arguments = $remoteStateArguments + " $($defaultArgs.Trim())" 
     }
        
-    Invoke-VstsTool -FileName terraform -arguments "init $arguments"
+    $plandir = (Get-VstsInput -Name PlanPath)
+
+    $args = "$arguments $plandir".Trim()
+
+    Invoke-VstsTool -FileName terraform -arguments "init $args"
 
     if ($LASTEXITCODE)
     {
@@ -153,14 +157,18 @@ function Invoke-Terraform
 {
     $arguments = (Get-VstsInput -Name Arguments -Require) -split '\s+'
 
-    $defaultArgs = "-input=false -no-color " + (Get-VstsInput -Name PlanPath)
+    $defaultArgs = "-input=false -no-color"
     
     if ($arguments.Trim() -like "validate*" -or $arguments.Trim() -like "workspace*") 
     {
-        $defaultArgs = "-no-color " + (Get-VstsInput -Name PlanPath)
+        $defaultArgs = "-no-color"
     }
     
-    Invoke-VstsTool -FileName terraform -arguments "$($arguments.Trim()) $($defaultArgs.TrimEnd())"
+    $plandir = (Get-VstsInput -Name PlanPath)
+
+    $args = "$($arguments.Trim()) $defaultArgs $plandir".Trim() 
+
+    Invoke-VstsTool -FileName terraform -arguments "$args"
 
     if ($LASTEXITCODE)
     {
