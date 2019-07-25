@@ -142,7 +142,7 @@ function Initialize-Terraform
     $plandir = (Get-VstsInput -Name PlanPath)
 
     if (-not ([string]::IsNullOrEmpty($plandir))){
-        if (-not (Get-Item $plandir) -is [System.IO.DirectoryInfo]){
+        if (-not ((Get-Item $plandir) -is [System.IO.DirectoryInfo])){
             if (Test-Path -Path $plandir){
                 $plandir = (Get-Item $plandir).Directory.FullName
             }
