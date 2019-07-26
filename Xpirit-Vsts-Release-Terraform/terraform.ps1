@@ -139,22 +139,7 @@ function Initialize-Terraform
         $arguments = $remoteStateArguments + " $($defaultArgs.Trim())" 
     }
        
-    $plandir = (Get-VstsInput -Name PlanPath)
-
-    if (-not ([string]::IsNullOrEmpty($plandir))){
-        if (-not ((Get-Item $plandir) -is [System.IO.DirectoryInfo])){
-            if (Test-Path -Path $plandir){
-                $plandir = (Get-Item $plandir).Directory.FullName
-            }
-            else {
-                Write-Host "##vso[task.logissue type=warning;] PlanPath contains an invalid path/file"
-            }
-        }
-    }
-
-    $args = "$arguments $plandir".Trim()
-
-    Invoke-VstsTool -FileName terraform -arguments "init $args"
+    Invoke-VstsTool -FileName terraform -arguments "init $arguments"
 
     if ($LASTEXITCODE)
     {
