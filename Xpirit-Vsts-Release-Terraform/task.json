@@ -40,6 +40,15 @@
       "helpMarkDown": "Path of plan file to use in apply step. Can also be used to specify alternate path to tf files."
     },
     {
+      "name": "TerraformPath",
+      "type": "filePath",
+      "label": "Path to Terraform Executable",
+      "defaultValue": "",
+      "required": false,
+      "helpMarkDown": "Path where a specific version of Terraform exists. Useful for multiple versions."
+      "visibleRule": "InstallTerraform == false"
+    },
+    {
       "name": "InstallTerraform",
       "type": "boolean",
       "label": "Install terraform",
