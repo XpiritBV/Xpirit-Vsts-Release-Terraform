@@ -33,7 +33,7 @@ function Install-Terraform
     $terraformbaseurl = "https://releases.hashicorp.com/terraform/"
     $path = "c:\terraform-download"
 
-    $regex = """/terraform/([0-9]+\.[0-9]+\.[0-9]+)/"""
+    $regex = """/terraform/([0-9]+\.[0-9]+\.[0-9]+)"""
 
     $webpage = (Invoke-WebRequest $terraformbaseurl -UseBasicParsing).Content
 
