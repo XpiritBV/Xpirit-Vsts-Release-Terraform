@@ -139,7 +139,17 @@ function Initialize-Terraform
         $arguments = $remoteStateArguments + " $($defaultArgs.Trim())" 
     }
        
-    Invoke-VstsTool -FileName terraform -arguments "init $arguments"
+    $TerraformPath = Get-VSTSInput -Name TerraformPath
+    
+    # execute without specific path
+    if ([string]::IsNullOrEmpty($TerraformPath) -or [string]::IsNullOrWhiteSpace($TerraformPath)) 
+    {
+        Invoke-VstsTool -FileName terraform -arguments "$args"
+    }
+    # execute wit specific path
+    else {
+        Invoke-VstsTool -FileName terraform -arguments "$args" -WorkingDirectory $TerraformPath
+    }
 
     if ($LASTEXITCODE)
     {
@@ -164,7 +174,17 @@ function Invoke-Terraform
 
     $args = "$($arguments.Trim()) $defaultArgs $plandir".Trim() 
 
-    Invoke-VstsTool -FileName terraform -arguments "$args"
+    $TerraformPath = Get-VSTSInput -Name TerraformPath
+    
+    # execute without specific path
+    if ([string]::IsNullOrEmpty($TerraformPath) -or [string]::IsNullOrWhiteSpace($TerraformPath)) 
+    {
+        Invoke-VstsTool -FileName terraform -arguments "$args"
+    }
+    # execute wit specific path
+    else {
+        Invoke-VstsTool -FileName terraform -arguments "$args" -WorkingDirectory $TerraformPath
+    }
 
     if ($LASTEXITCODE)
     {
